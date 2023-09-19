@@ -25,13 +25,13 @@ const createCards = (data) => {
 
         cards.forEach((card, i) => {
          card.addEventListener("click", (e) => {
-            console.log("clicked!", e.target)
             createModal(employees[i], i)
         })
     })
 }
 
 const createModal = (employee, i) => {
+    console.log(employee, i)
     const birthday = new Date(employee.dob.date).toLocaleDateString('en-US');
     const phone =  employee.phone.replace( /(\d{3})(\d{3})(\d{4})/,'$1-$2-$3' )
 
@@ -68,10 +68,36 @@ const createModal = (employee, i) => {
 
     const modal = document.querySelector(".modal-container");
     const closeBtn = document.querySelector("#modal-close-btn");
+    const nextBtn = document.querySelector("#modal-next");
+    const prevBtn = document.querySelector("#modal-prev");
 
     closeBtn.addEventListener("click", () => {
         gallery.removeChild(modal)
     })
+
+
+    nextBtn.addEventListener("click", () => {
+        gallery.removeChild(modal);
+
+        if (i === employees.length-1) {
+            createModal(employees[0], 0)
+        } else {
+        createModal(employees[i+1], i+1)
+        }
+       
+    });
+
+    prevBtn.addEventListener("click", () => {
+        gallery.removeChild(modal);
+
+        if (i === 0) {
+            createModal(employees[employees.length-1], employees.length-1)
+        } else {
+        createModal(employees[i-1], i-1)
+        }
+       
+    })
+
 }
 
 // const getUserData = async() => {
