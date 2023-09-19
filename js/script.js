@@ -1,12 +1,16 @@
-let employees = [];
+
+let employeesData = [];
+
 const gallery = document.querySelector("#gallery");
+const searchDiv = document.querySelector(".search-container")
+document.body.style.backgroundColor = "#B9D9EB";
 
 
+//Creates employee info cards
 const createCards = (data) => {
-    employees.push(...data.results);
 
-    employees.forEach(employee => {
-        const html = `
+    data.forEach(employee => {
+       const html = `
             <div class="card">
                 <div class="card-img-container">
                     <img class="card-img" src=${employee.picture.large} alt="profile picture">
@@ -25,13 +29,14 @@ const createCards = (data) => {
 
         cards.forEach((card, i) => {
          card.addEventListener("click", (e) => {
-            createModal(employees[i], i)
+            createModal(data, data[i], i)
         })
     })
 }
 
-const createModal = (employee, i) => {
-    console.log(employee, i)
+
+//Creates employee modal with more details
+const createModal = (employees, employee, i) => {
     const birthday = new Date(employee.dob.date).toLocaleDateString('en-US');
     const phone =  employee.phone.replace( /(\d{3})(\d{3})(\d{4})/,'$1-$2-$3' )
 
@@ -71,64 +76,87 @@ const createModal = (employee, i) => {
     const nextBtn = document.querySelector("#modal-next");
     const prevBtn = document.querySelector("#modal-prev");
 
+    //close modal
     closeBtn.addEventListener("click", () => {
         gallery.removeChild(modal)
     })
 
 
+    //next button on modal
     nextBtn.addEventListener("click", () => {
         gallery.removeChild(modal);
 
         if (i === employees.length-1) {
-            createModal(employees[0], 0)
+            createModal(employees, employees[0], 0)
         } else {
-        createModal(employees[i+1], i+1)
+        createModal(employees, employees[i+1], i+1)
         }
        
     });
 
+     //prev button on modal
     prevBtn.addEventListener("click", () => {
         gallery.removeChild(modal);
 
         if (i === 0) {
-            createModal(employees[employees.length-1], employees.length-1)
+            createModal(employees, employees[employees.length-1], employees.length-1)
         } else {
-        createModal(employees[i-1], i-1)
+        createModal(employees, employees[i-1], i-1)
         }
        
     })
 
 }
 
-// const getUserData = async() => {
-//     try {
-//         const response = await fetch('https://randomuser.me/api/?results=12&');
-//         if (response.ok) {
-//             const data = await response.json();
-//             employees.push(...data.results)
-//             createCards()
-//         } else {
-//             console.log("Not successful:", response)
-//         }
-//     } catch (e) {
-//         console.log(e)
-//     }
+//Search input
+const search = `
+<form action="#" method="get">
+<input type="search" id="search-input" class="search-input" placeholder="Search...">
+<input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+</form>
+`
+searchDiv.insertAdjacentHTML('beforeend', search);
+const form = document.querySelector('form');
+const searchInput = document.querySelector('#search-input');
 
-// } 
-// getUserData()
+form.addEventListener('submit', (e) => {
+   // e.preventDefault();
+const values = searchInput.value.trim().toLowerCase().split(' ');
 
+const results = employeesData.filter(employee => {
+    for (const value of values) {
+      if (employee.name.first.toLowerCase().includes(value) || employee.name.last.toLowerCase().includes(value)) {
+      return employee
+      }
+    }  
+  })
+    
+
+  gallery.innerHTML =''
+
+createCards(results)
+})
+
+//checks when it's clear
+searchInput.addEventListener("input", (e) => {
+  if (!e.target.value) {
+    gallery.innerHTML =''
+    createCards(employeesData)}
+    })
 
 
 fetch('https://randomuser.me/api/?results=12&nat=US')
     .then(res => {
-        console.log(res)
         if (res.ok) {
-            console.log("Success!")
+            // console.log("Success!")
            return res.json() 
         } else {
-            console.log(res)
-            console.log("Not successful!")
+            // console.log(res)
+            // console.log("Not successful!")
         }
        
     })
-    .then(data =>  createCards(data))
+    .then(data =>  {
+      employeesData.push(...data.results);
+      createCards(data.results)
+    })
